@@ -39,6 +39,8 @@ veljavni (morda boste morali spremeniti pot na 32bitno različico glede na vašo
 
 Task `Compile Lambda` bi moral delovati kjerkoli iz mape, `Lambda Eager` pa vam v lambdi zažene trenutno odprto datoteko.
 
+**Kadar vam lambda javi napako `End_of_file`, morate spremeniti 'end of line sequence'. To lahko storite v VSCode meniju (ukaz `Change End of Line Sequence`) ali pa v spodnjem desnem kotu okna, kjer je izbrana opcija `CRLF`, ki jo spremenite na `LF`.
+
 ## RAZŠIRITEV S PARI IN SEZNAMI
 
 Jezik lambda smo na vajah idejno že razširili s pari in seznami. Tako pari kot seznami so že dodani v parser in sintakso jezika. 
@@ -47,7 +49,7 @@ Dodan je konstruktor za pare `{e1, e2} ~ Pair (e1, e2)`, prazen seznam `[] ~ Nil
 
 Vaša naloga je:
 1. V `syntax.ml` dopolnite substitucijo za nove konstrukte.
-2. Dopolnite evaluator `eval.ml` za nove konstrukte.
+2. Dopolnite evaluator `eval.ml` za nove konstrukte. Pomembno je, da pravilno deluje za smiselne programe (torej ne rabite skrbeti kaj se zgodi s programom `FST 1`).
 3. V datoteko `map.lam` napišite funkcijo `map` in jo uporabite na primeru.
 4. V datoteko `unzip.lam` napišite funkicjo `unzip` in jo uporabite na primeru.
 
