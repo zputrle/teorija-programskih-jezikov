@@ -130,6 +130,33 @@ let rec exp3 chrs =
     spaces1 >>
     exp3 >>= fun e ->
     return (Syntax.RecLambda (f, x, e))
+  and match' =
+    word "MATCH" >>
+    spaces1 >>
+    exp3 >>= fun e ->
+    spaces1 >>
+    word "WITH" >>
+    spaces1 >>
+    word "|" >>
+    spaces1 >>
+    word "[]" >>
+    spaces1 >>
+    word "->" >>
+    spaces1 >>
+    exp3 >>= fun e1 ->
+    spaces1 >>
+    word "|" >>
+    spaces1 >>
+    ident >>= fun x ->
+    spaces1 >>
+    word "::" >>
+    spaces1 >>
+    ident >>= fun xs ->
+    spaces1 >>
+    word "->" >>
+    spaces1 >>
+    exp3 >>= fun e2 ->
+    return (Syntax.Match (e, e1, x, xs, e2))
   and let_in =
     word "LET" >>
     spaces1 >>
@@ -161,7 +188,7 @@ let rec exp3 chrs =
     exp3 >>= fun e2 ->
     return (Syntax.let_rec_in (f, x, e1, e2))
   in
-  one_of [if_then_else; lambda; rec_lambda; let_in; let_rec_in; exp2] chrs
+  one_of [if_then_else; lambda; rec_lambda; match'; let_in; let_rec_in; exp2] chrs
 
 and exp2 chrs =
   one_of
@@ -171,6 +198,7 @@ and exp2 chrs =
     ; binop exp1 "=" exp2 (fun e1 e2 -> Syntax.Equal (e1, e2))
     ; binop exp1 "<" exp2 (fun e1 e2 -> Syntax.Less (e1, e2))
     ; binop exp1 ">" exp2 (fun e1 e2 -> Syntax.Greater (e1, e2))
+    ; binop exp1 "::" exp2 (fun e1 e2 -> Syntax.Cons (e1, e2))
     ; exp1 ]
     chrs
 
@@ -179,18 +207,43 @@ and exp1 chrs =
     exp0 >>= fun e ->
     many1 (spaces1 >> exp0) >>= fun es ->
     return (List.fold_left (fun e1 e2 -> Syntax.Apply (e1, e2)) e es)
+  and fst_proj =
+    word "FST" >>
+    spaces1 >>
+    exp0 >>= fun e ->
+    return (Syntax.Fst e)
+  and snd_proj =
+    word "SND" >>
+    spaces1 >>
+    exp0 >>= fun e ->
+    return (Syntax.Snd e)
   in
   one_of
     [ apply
+    ; fst_proj
+    ; snd_proj
     ; exp0 ]
     chrs
 
-
 and exp0 chrs =
+  let pair =
+    word "{" >>
+    spaces >>
+    exp2 >>= fun e1 ->
+    spaces >>
+    word "," >>
+    spaces >>
+    exp2 >>= fun e2 ->
+    spaces >>
+    word "}" >>
+    return (Syntax.Pair (e1, e2))
+  in
   one_of
     [ (integer >>= fun n -> return (Syntax.Int n))
     ; word "TRUE" >> return (Syntax.Bool true)
     ; word "FALSE" >> return (Syntax.Bool false)
+    ; pair
+    ; word "[]" >> return (Syntax.Nil)
     ; (ident >>= fun x -> return (Syntax.Var x))
     ; parens exp3 ]
     chrs
