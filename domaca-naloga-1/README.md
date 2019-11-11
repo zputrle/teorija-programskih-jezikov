@@ -1,16 +1,15 @@
 # NAVODILA ZA PRVO DOMAČO NALOGO
 
 Naloga obsega dve razširitvi jezika Lambda, ki ste ga spoznali tekom predavanj.
-Jezik lambda se v celoti nahaja v sklopu `04-lambda-racun`.
 
-Za oddajo naloge si podvojite repozitorij (*fork*) na vaš uporabniški račun. Razširitve jezika in dodatne datoteke nato dodajte na vaš repozitorij (prav tako na vejo `domaca_naloga_1`), na spletni učilnici pa oddate zgolj povezavo do vašega repozitorija.
+Za oddajo naloge si podvojite repozitorij (*fork*) na vaš uporabniški račun. Razširitve jezika in dodatne datoteke nato dodajte na vaš repozitorij (prav tako na vejo `domaca-naloga-01`), na spletni učilnici pa oddate zgolj povezavo do vašega repozitorija.
 
 ## IZGRADNJA JEZIKA LAMBDA
 
 Cilj domače naloge so razširitve jezike, zato pri problemih z izgradnjo jezika lambda pošljite e-mail, da problem čimprej rešimo.
 
 ### Linux & Mac
-Za izgradnjo jezika v konzoli navigirajte do mape `04-lambda-racun/lambda` in v njej poženite `ocamlbuild lambda.native`.
+Za izgradnjo jezika v konzoli navigirajte do mape `domaca-naloga-01/lambda` in v njej poženite `ocamlbuild lambda.native`.
 
 Compiler vam bo zgradil datoteko `lambda.native`, ki jo potem poganjate kot 
 

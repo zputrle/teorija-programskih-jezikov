@@ -14,6 +14,12 @@ type exp =
   | Lambda of ident * exp
   | RecLambda of ident * ident * exp
   | Apply of exp * exp
+  | Pair of exp * exp
+  | Fst of exp
+  | Snd of exp
+  | Nil
+  | Cons of exp * exp
+  | Match of exp * exp * ident * ident * exp
 
 let let_in (x, e1, e2) = Apply (Lambda (x, e2), e1)
 let let_rec_in (f, x, e1, e2) = let_in (f, RecLambda (f, x, e1), e2)
@@ -40,6 +46,7 @@ let rec subst sbst = function
       RecLambda (f, x, subst sbst' e)
   | Apply (e1, e2) -> Apply (subst sbst e1, subst sbst e2)
 
+
 let rec string_of_exp3 = function
   | IfThenElse (e, e1, e2) ->
       "IF " ^ string_of_exp2 e ^ " THEN " ^ string_of_exp2 e1 ^ " ELSE " ^ string_of_exp3 e2
@@ -47,6 +54,8 @@ let rec string_of_exp3 = function
       "FUN " ^ x ^ " -> " ^ string_of_exp3 e
   | RecLambda (f, x, e) ->
       "REC " ^ f ^ " " ^ x ^ " -> " ^ string_of_exp3 e
+  | Match (e, e1, x, xs, e2) ->
+      "MATCH " ^ string_of_exp2 e ^ " WITH [] -> " ^ string_of_exp2 e1 ^ " | " ^ x ^ "::" ^ xs ^ " -> " ^ string_of_exp3 e2
   | e -> string_of_exp2 e
 and string_of_exp2 = function
   | Equal (e1, e2) ->
@@ -59,17 +68,23 @@ and string_of_exp2 = function
     string_of_exp1 e1 ^ " + " ^ string_of_exp1 e2
   | Minus (e1, e2) ->
     string_of_exp1 e1 ^ " - " ^ string_of_exp1 e2
+  | Cons (e1, e2) ->
+    string_of_exp1 e1 ^ " :: " ^ string_of_exp2 e2
   | Times (e1, e2) ->
     string_of_exp1 e1 ^ " * " ^ string_of_exp1 e2
   | e -> string_of_exp1 e
 and string_of_exp1 = function
   | Apply (e1, e2) ->
     string_of_exp0 e1 ^ " " ^ string_of_exp0 e2
+  | Fst e -> "FST " ^ string_of_exp0 e
+  | Snd e -> "SND " ^ string_of_exp0 e
   | e -> string_of_exp0 e
 and string_of_exp0 = function
   | Int n -> string_of_int n
   | Bool b -> if b then "TRUE" else "FALSE"
   | Var x -> x
+  | Nil -> "[]"
+  | Pair (e1, e2) -> "{" ^ string_of_exp2 e1 ^ ", " ^ string_of_exp2 e2 ^ "}"
   | e -> "(" ^ string_of_exp3 e ^ ")"
 
-let string_of_exp = string_of_exp5
+let string_of_exp = string_of_exp3
