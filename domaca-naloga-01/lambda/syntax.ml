@@ -55,7 +55,7 @@ let rec string_of_exp3 = function
   | RecLambda (f, x, e) ->
       "REC " ^ f ^ " " ^ x ^ " -> " ^ string_of_exp3 e
   | Match (e, e1, x, xs, e2) ->
-      "MATCH " ^ string_of_exp2 e ^ " WITH [] -> " ^ string_of_exp2 e1 ^ " | " ^ x ^ "::" ^ xs ^ " -> " ^ string_of_exp3 e2
+      "MATCH " ^ string_of_exp2 e ^ " WITH | [] -> " ^ string_of_exp2 e1 ^ " | " ^ x ^ "::" ^ xs ^ " -> " ^ string_of_exp3 e2
   | e -> string_of_exp2 e
 and string_of_exp2 = function
   | Equal (e1, e2) ->
