@@ -38,6 +38,17 @@ let rec subst sbst = function
   | Less (e1, e2) -> Less (subst sbst e1, subst sbst e2)
   | Greater (e1, e2) -> Greater (subst sbst e1, subst sbst e2)
   | IfThenElse (e, e1, e2) -> IfThenElse (subst sbst e, subst sbst e1, subst sbst e2)
+  | Nil -> Nil
+  | Cons (e1, e2) -> Cons (subst sbst e1, subst sbst e2)
+  | Match (e, e1, x, xs, e2) ->
+    Match (
+      subst sbst e,
+      subst sbst e1,
+      x, xs,
+      let
+        sbst' = List.remove_assoc x (List.remove_assoc xs sbst)
+      in
+        subst sbst' e2)
   | Lambda (x, e) ->
       let sbst' = List.remove_assoc x sbst in
       Lambda (x, subst sbst' e)

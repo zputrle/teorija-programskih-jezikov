@@ -48,13 +48,20 @@ and eval_int e =
   | S.Int n -> n
   | _ -> failwith "Integer expected"
 
-let is_value = function
+let rec is_value = function
   | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ -> true
   | S.Var _ | S.Plus _ | S.Minus _ | S.Times _ | S.Equal _ | S.Less _ | S.Greater _
-  | S.IfThenElse _ | S.Apply _ -> false
+  | S.IfThenElse _ | S.Apply _ | S.Match _-> false
+  | S.Nil -> true
+  | S.Cons (e1, e2) -> is_value e1 && is_value e2
 
 let rec step = function
-  | S.Var _ | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ -> failwith "Expected a non-terminal expression"
+  | S.Var _
+  | S.Int _
+  | S.Bool _
+  | S.Lambda _
+  | S.RecLambda _
+    -> failwith "Expected a non-terminal expression"
   | S.Plus (S.Int n1, S.Int n2) -> S.Int (n1 + n2)
   | S.Plus (S.Int n1, e2) -> S.Plus (S.Int n1, step e2)
   | S.Plus (e1, e2) -> S.Plus (step e1, e2)
@@ -79,6 +86,10 @@ let rec step = function
   | S.Apply (S.RecLambda (f, x, e) as rec_f, v) when is_value v -> S.subst [(f, rec_f); (x, v)] e
   | S.Apply ((S.Lambda _ | S.RecLambda _) as f, e) -> S.Apply (f, step e)
   | S.Apply (e1, e2) -> S.Apply (step e1, e2)
+  | S.Cons (e1, e2) -> if is_value e1 then S.Cons (e1, step e2) else S.Cons (step e1, e2)
+  | S.Match (S.Nil, e1, x, xs, e2) -> e1
+  | S.Match (S.Cons(v1, v2), e1, x, xs, e2) -> (S.subst [(x, v1); (xs, v2)] e2)
+  | S.Match (e, e1, x, xs, e2) -> S.Match (step e, e1, x, xs, e2)
 
 let big_step e =
   let v = eval_exp e in
@@ -86,6 +97,8 @@ let big_step e =
 
 let rec small_step e =
   print_endline (S.string_of_exp e);
-  if not (is_value e) then
+  if is_value e then
+    e
+  else
     (print_endline "  ~>";
     small_step (step e))

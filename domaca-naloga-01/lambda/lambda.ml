@@ -13,8 +13,9 @@ let main () =
     let source = read_source filename in
     let e = Parser.parse source in
     print_endline "MALI KORAKI:";
-    (if eager then Eval.small_step e else LazyEval.small_step e);
-    print_endline "VELIKI KORAKI:";
-    (if eager then Eval.big_step e else LazyEval.big_step e)
+    (if eager then Eval.small_step e else LazyEval.small_step e)
+    (* TODO *)
+    (* print_endline "VELIKI KORAKI:";
+    (if eager then Eval.big_step e else LazyEval.big_step e) *)
 
 let _ = main ()
