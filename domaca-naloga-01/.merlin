@@ -1,2 +1,3 @@
 S lambda
-B _build/*
+S tests
+B _build/**

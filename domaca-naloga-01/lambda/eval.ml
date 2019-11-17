@@ -1,9 +1,8 @@
 module S = Syntax
 
-
 let rec eval_exp = function
   | S.Var x -> failwith "Expected a closed term"
-  | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ as e -> e
+  | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ | S.Nil as e -> e
   | S.Plus (e1, e2) ->
       let n1 = eval_int e1
       and n2 = eval_int e2
@@ -43,17 +42,53 @@ let rec eval_exp = function
       | S.RecLambda (f, x, e) as rec_f -> eval_exp (S.subst [(f, rec_f); (x, v)] e)
       | _ -> failwith "Function expected"
       end
+  | S.Cons (e1, e2) ->
+    let v1 = eval_exp e1
+    and v2 = eval_exp e2
+    in
+    S.Cons(v1, v2)
+  | S.Match (e, e1, x, xs, e2) ->
+    let v = eval_exp e
+    in
+      begin match v with
+      | S.Nil -> eval_exp e1
+      | S.Cons (v1 ,v2) -> eval_exp (S.subst [(x, v1); (xs, v2)] e2)
+      | _ -> failwith (
+              "Evaluation 'match' expression. " ^
+              "Expected Cons or Nil but received: " ^ Syntax.string_of_exp v)
+      end
+  | S.Pair(e1, e2) ->
+    let v1 = eval_exp e1
+    and v2 = eval_exp e2
+    in
+    S.Pair(v1, v2)
+  | S.Fst(e) ->
+      let v = eval_exp e
+      in
+        begin match v with
+        | Pair (v1, v2) -> v1
+        | _ -> failwith "Expected pair"
+        end
+  | S.Snd(e) ->
+      let v = eval_exp e
+      in
+        begin match v with
+        | Pair (v1, v2) -> v2
+        | _ -> failwith "Expected pair"
+        end
 and eval_int e =
   match eval_exp e with
   | S.Int n -> n
   | _ -> failwith "Integer expected"
 
-let rec is_value = function
+let rec is_value ex = 
+  match ex with
   | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ -> true
-  | S.Var _ | S.Plus _ | S.Minus _ | S.Times _ | S.Equal _ | S.Less _ | S.Greater _
-  | S.IfThenElse _ | S.Apply _ | S.Match _-> false
   | S.Nil -> true
   | S.Cons (e1, e2) -> is_value e1 && is_value e2
+  | S.Pair (e1, e2) -> is_value e1 && is_value e2
+  | S.Var _ | S.Plus _ | S.Minus _ | S.Times _ | S.Equal _ | S.Less _ | S.Greater _
+  | S.IfThenElse _ | S.Apply _ | S.Match _| S.Fst _ | S.Snd _ -> false
 
 let rec step = function
   | S.Var _
@@ -61,6 +96,7 @@ let rec step = function
   | S.Bool _
   | S.Lambda _
   | S.RecLambda _
+  | S.Nil
     -> failwith "Expected a non-terminal expression"
   | S.Plus (S.Int n1, S.Int n2) -> S.Int (n1 + n2)
   | S.Plus (S.Int n1, e2) -> S.Plus (S.Int n1, step e2)
@@ -90,10 +126,17 @@ let rec step = function
   | S.Match (S.Nil, e1, x, xs, e2) -> e1
   | S.Match (S.Cons(v1, v2), e1, x, xs, e2) -> (S.subst [(x, v1); (xs, v2)] e2)
   | S.Match (e, e1, x, xs, e2) -> S.Match (step e, e1, x, xs, e2)
+  | S.Pair (e1, e2) when is_value e1 -> S.Pair (e1, step e2)
+  | S.Pair (e1, e2) -> S.Pair (step e1, e2)
+  | S.Snd Pair (e1, e2) when is_value (Pair (e1, e2)) -> e2
+  | S.Snd e -> S.Snd (step e)
+  | S.Fst Pair (e1, e2) when is_value (Pair (e1, e2)) -> e1 
+  | S.Fst e -> S.Fst (step e)
 
 let big_step e =
   let v = eval_exp e in
-  print_endline (S.string_of_exp v)
+    print_endline (S.string_of_exp v);
+    v
 
 let rec small_step e =
   print_endline (S.string_of_exp e);
