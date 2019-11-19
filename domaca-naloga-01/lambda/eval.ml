@@ -135,13 +135,26 @@ let rec step = function
 
 let big_step e =
   let v = eval_exp e in
+  print_endline (S.string_of_exp v)
+
+let rec small_step e =
+  print_endline (S.string_of_exp e);
+  if not (is_value e) then
+    (print_endline "  ~>";
+    small_step (step e))
+
+(* Same as function 'big_step' except that the evaluated expression is returned. *)
+let r_big_step e =
+  let v = eval_exp e in
     print_endline (S.string_of_exp v);
     v
 
-let rec small_step e =
+(* Same as function 'small_step' except that the evaluated expression is returned. *)
+let rec r_small_step e =
   print_endline (S.string_of_exp e);
   if is_value e then
     e
   else
     (print_endline "  ~>";
-    small_step (step e))
+    r_small_step (step e))
+

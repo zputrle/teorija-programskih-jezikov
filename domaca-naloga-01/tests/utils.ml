@@ -1,11 +1,13 @@
 exception TestFaild of string
 
 let parse_and_run e_str = 
+  print_endline "Parsing ...";
   let e = Parser.parse e_str in
+      print_endline "Parsing complete.";
       print_endline "VELIKI KORAKI:";
-    let rs_vk = Eval.big_step e in
+    let rs_vk = Eval.r_big_step e in
       print_endline "MALI KORAKI:";
-    let rs_mk = Eval.small_step e in
+    let rs_mk = Eval.r_small_step e in
       let rs_vk_s = (Syntax.string_of_exp rs_vk)
       and rs_mk_s = (Syntax.string_of_exp rs_mk) in
         if String.equal rs_mk_s rs_vk_s then rs_mk else

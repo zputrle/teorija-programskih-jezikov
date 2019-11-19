@@ -56,6 +56,10 @@ let rec subst sbst = function
         sbst' = List.remove_assoc x (List.remove_assoc xs sbst)
       in
         subst sbst' e2)
+  (* TODO: Test substitution on pairs. *)
+  | Pair (e1, e2) -> Pair (subst sbst e1, subst sbst e2)
+  | Fst e1 -> Fst (subst sbst e1) 
+  | Snd e1 -> Snd (subst sbst e1) 
 
 let rec string_of_exp3 = function
   | IfThenElse (e, e1, e2) ->
