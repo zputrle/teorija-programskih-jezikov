@@ -39,8 +39,8 @@ let rec eval_exp = function
       and v = eval_exp e2
       in
       begin match f with
-      | S.Lambda (x, e) -> eval_exp (S.subst [(x, v)] e)
-      | S.RecLambda (f, x, e) as rec_f -> eval_exp (S.subst [(f, rec_f); (x, v)] e)
+      | S.Lambda (x, e) -> eval_exp (S.subst_exp [(x, v)] e)
+      | S.RecLambda (f, x, e) as rec_f -> eval_exp (S.subst_exp [(f, rec_f); (x, v)] e)
       | _ -> failwith "Function expected"
       end
 and eval_int e =
@@ -75,8 +75,8 @@ let rec step = function
   | S.Greater (e1, e2) -> S.Greater (step e1, e2)
   | S.IfThenElse (S.Bool b, e1, e2) -> if b then e1 else e2
   | S.IfThenElse (e, e1, e2) -> S.IfThenElse (step e, e1, e2)
-  | S.Apply (S.Lambda (x, e), v) when is_value v -> S.subst [(x, v)] e
-  | S.Apply (S.RecLambda (f, x, e) as rec_f, v) when is_value v -> S.subst [(f, rec_f); (x, v)] e
+  | S.Apply (S.Lambda (x, e), v) when is_value v -> S.subst_exp [(x, v)] e
+  | S.Apply (S.RecLambda (f, x, e) as rec_f, v) when is_value v -> S.subst_exp [(f, rec_f); (x, v)] e
   | S.Apply ((S.Lambda _ | S.RecLambda _) as f, e) -> S.Apply (f, step e)
   | S.Apply (e1, e2) -> S.Apply (step e1, e2)
 

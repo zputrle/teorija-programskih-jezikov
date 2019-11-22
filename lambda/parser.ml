@@ -69,11 +69,6 @@ let integer =
   many1 digit >>= fun digits ->
   return (int_of_string (implode digits))
 
-let ident =
-  alpha >>= fun chr ->
-  many (alpha || digit || exactly '\'') >>= fun chrs ->
-  return (implode (chr :: chrs))
-
 let spaces = many space >> return ()
 
 let spaces1 = many1 space >> return ()
@@ -95,6 +90,11 @@ let binop parser1 op parser2 f =
   return (f v1 v2)
 
 (* LAMBDA PARSERS *)
+
+let ident =
+  alpha >>= fun chr ->
+  many (alpha || digit || exactly '\'') >>= fun chrs ->
+  return (Syntax.Ident (implode (chr :: chrs)))
 
 let rec exp3 chrs =
   let if_then_else =
