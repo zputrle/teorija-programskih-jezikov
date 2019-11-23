@@ -72,8 +72,20 @@ let rec solve sbst = function
   | (t1, t2) :: _ ->
       failwith ("Cannot solve " ^ S.string_of_ty t1 ^ " = " ^ S.string_of_ty t2)
 
+let rec renaming sbst = function
+  | S.ParamTy a ->
+      if List.mem_assoc a sbst
+      then sbst
+      else (a, S.ParamTy (S.Param (List.length sbst))) :: sbst
+  | S.IntTy | S.BoolTy -> sbst
+  | S.ArrowTy (t1, t2) ->
+      let sbst' = renaming sbst t1 in
+      renaming sbst' t2
+
 let infer e =
   let t, eqs = infer_exp [] e in
   let sbst = solve [] eqs in
   let t' = S.subst_ty sbst t in
-  print_endline (S.string_of_exp e ^ " : " ^ S.string_of_ty t')
+  let sbst' = renaming [] t' in
+  let t'' = S.subst_ty sbst' t' in
+  print_endline (S.string_of_exp e ^ " : " ^ S.string_of_ty t'')
