@@ -8,4 +8,4 @@ U.ensure_equal "FST (SND {10, {20, 30}})" "20";;
 
 U.ensure_equal "SND {1, 2 + 3}" "5";;
 
-U.ensure_equal "SND (SND {1, {2, {3, {4, 5}}}})" "20";;
+U.ensure_equal "SND (SND {1, {2, {3, {4, 5}}}})" "{3, {4, 5}}";;

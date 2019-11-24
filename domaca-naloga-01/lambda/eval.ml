@@ -122,15 +122,16 @@ let rec step = function
   | S.Apply (S.RecLambda (f, x, e) as rec_f, v) when is_value v -> S.subst [(f, rec_f); (x, v)] e
   | S.Apply ((S.Lambda _ | S.RecLambda _) as f, e) -> S.Apply (f, step e)
   | S.Apply (e1, e2) -> S.Apply (step e1, e2)
-  | S.Cons (e1, e2) -> if is_value e1 then S.Cons (e1, step e2) else S.Cons (step e1, e2)
+  | S.Cons (e1, e2) when is_value e1 -> S.Cons (e1, step e2)
+  | S.Cons (e1, e2) -> S.Cons (step e1, e2)
   | S.Match (S.Nil, e1, x, xs, e2) -> e1
-  | S.Match (S.Cons(v1, v2), e1, x, xs, e2) -> (S.subst [(x, v1); (xs, v2)] e2)
+  | S.Match ((S.Cons(v1, v2)) as p, e1, x, xs, e2) when is_value p -> (S.subst [(x, v1); (xs, v2)] e2)
   | S.Match (e, e1, x, xs, e2) -> S.Match (step e, e1, x, xs, e2)
   | S.Pair (e1, e2) when is_value e1 -> S.Pair (e1, step e2)
   | S.Pair (e1, e2) -> S.Pair (step e1, e2)
-  | S.Snd Pair (e1, e2) when is_value (Pair (e1, e2)) -> e2
+  | S.Snd ((Pair (e1, e2)) as p) when is_value p -> e2
   | S.Snd e -> S.Snd (step e)
-  | S.Fst Pair (e1, e2) when is_value (Pair (e1, e2)) -> e1 
+  | S.Fst ((Pair (e1, e2)) as p) when is_value p -> e1 
   | S.Fst e -> S.Fst (step e)
 
 let big_step e =
@@ -143,7 +144,7 @@ let rec small_step e =
     (print_endline "  ~>";
     small_step (step e))
 
-(* Same as function 'big_step' except that the evaluated expression is returned. *)
+(* Same as 'big_step' except that the evaluated expression is returned. *)
 let r_big_step e =
   let v = eval_exp e in
     print_endline (S.string_of_exp v);

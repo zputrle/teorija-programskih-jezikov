@@ -24,7 +24,8 @@ type exp =
 let let_in (x, e1, e2) = Apply (Lambda (x, e2), e1)
 let let_rec_in (f, x, e1, e2) = let_in (f, RecLambda (f, x, e1), e2)
 
-let rec subst sbst = function
+(* Previous substitution method. *)
+(* let rec subst sbst = function
   | Var x as e ->
       begin match List.assoc_opt x sbst with
       | None -> e
@@ -56,10 +57,55 @@ let rec subst sbst = function
         sbst' = List.remove_assoc x (List.remove_assoc xs sbst)
       in
         subst sbst' e2)
-  (* TODO: Test substitution on pairs. *)
   | Pair (e1, e2) -> Pair (subst sbst e1, subst sbst e2)
   | Fst e1 -> Fst (subst sbst e1) 
-  | Snd e1 -> Snd (subst sbst e1) 
+  | Snd e1 -> Snd (subst sbst e1)  *)
+
+let assgin_new_names l = List.map (fun x -> (x, Var ("__" ^ x))) l
+
+let rec _subst sbst bound = function
+  | Var x as e ->
+        begin match List.assoc_opt x sbst with
+        | None -> e
+        | Some e' -> _subst (assgin_new_names bound) bound e'
+        (* | Some e' -> e *)
+        end
+  | Int _ | Bool _ as e -> e
+  | Plus (e1, e2) -> Plus (_subst sbst bound e1, _subst sbst bound e2)
+  | Minus (e1, e2) -> Minus (_subst sbst bound e1, _subst sbst bound e2)
+  | Times (e1, e2) -> Times (_subst sbst bound e1, _subst sbst bound e2)
+  | Equal (e1, e2) -> Equal (_subst sbst bound e1, _subst sbst bound e2)
+  | Less (e1, e2) -> Less (_subst sbst bound e1, _subst sbst bound e2)
+  | Greater (e1, e2) -> Greater (_subst sbst bound e1, _subst sbst bound e2)
+  | IfThenElse (e, e1, e2) -> IfThenElse (_subst sbst bound e, _subst sbst bound e1, _subst sbst bound e2)
+  | Lambda (x, e) ->
+      let sbst' = List.remove_assoc x sbst
+      and bound' = x::bound
+      in
+      Lambda (x, _subst sbst' bound' e)
+  | RecLambda (f, x, e) ->
+      let sbst' = List.remove_assoc f (List.remove_assoc x sbst)
+      and bound' = x::bound
+      in
+      RecLambda (f, x, _subst sbst' bound' e)
+  | Apply (e1, e2) -> Apply (_subst sbst bound e1, _subst sbst bound e2)
+  | Nil -> Nil
+  | Cons (e1, e2) -> Cons (_subst sbst bound e1, _subst sbst bound e2)
+  | Match (e, e1, x, xs, e2) ->
+    Match (
+      _subst sbst bound e,
+      _subst sbst bound e1,
+      x, xs,
+      let sbst' = List.remove_assoc x (List.remove_assoc xs sbst)
+      and bound' = x::xs::bound
+      in
+        _subst sbst' bound' e2)
+  | Pair (e1, e2) -> Pair (_subst sbst bound e1, _subst sbst bound e2)
+  | Fst e1 -> Fst (_subst sbst bound e1) 
+  | Snd e1 -> Snd (_subst sbst bound e1)
+
+(* Fixed substitution metod. *)
+let rec subst sbst = _subst sbst []
 
 let rec string_of_exp3 = function
   | IfThenElse (e, e1, e2) ->

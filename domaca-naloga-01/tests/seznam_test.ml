@@ -21,8 +21,8 @@ U.ensure_equal
 U.ensure_equal
   "MATCH (10 + 5) :: [] WITH
   | [] -> FALSE
-  | x :: xs -> TRUE"
-  "TRUE";;
+  | x :: xs -> x"
+  "15";;
 U.ensure_equal
   "MATCH 1 :: 2 :: [] WITH
   | [] -> []
