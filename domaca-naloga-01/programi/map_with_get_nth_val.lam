@@ -1,0 +1,25 @@
+LET REC get l =
+    LET REC _get n =
+        MATCH l WITH
+        | [] -> []
+        | x :: xs ->
+            IF n > 0 THEN
+                (get xs (n - 1))
+            ELSE
+                x
+    IN
+    _get
+IN
+LET REC map f = 
+    LET REC i_map l =
+        MATCH l WITH
+        | [] -> []
+        | x :: xs -> (f x) :: (i_map xs)
+    IN
+    i_map
+IN
+get 
+    (map
+        (FUN x -> x * x)
+        (1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: []))
+        7

@@ -1,6 +1,7 @@
-LET REC fib n =
-    IF n = 0 THEN 0
-    ELSE IF n = 1 THEN 1
-    ELSE fib (n - 1) + fib (n - 2)
+LET REC infinite_list next =
+    LET REC _infinite_list val =
+        val :: (_infinite_list (next val))
+    IN
+    _infinite_list
 IN
-(FUN x -> TRUE) (fib 10000)
+    infinite_list (FUN x -> x + 1) 1

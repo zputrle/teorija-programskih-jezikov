@@ -1,0 +1,19 @@
+LET REC get l =
+    LET REC _get n =
+        MATCH l WITH
+        | [] -> []
+        | x :: xs ->
+            IF n > 0 THEN
+                (get xs (n - 1))
+            ELSE
+                x
+    IN
+    _get
+IN
+LET REC infinite_list next =
+    LET REC _infinite_list val =
+        val :: (_infinite_list (next val))
+    IN
+    _infinite_list
+IN
+    get (infinite_list (FUN x -> x * 2) 1) 8
