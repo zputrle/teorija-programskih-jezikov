@@ -41,5 +41,8 @@ in
         ((fib n) :: ((n_fib_nums) (n -1)))
     IN
       (n_fib_nums 5)")
-    "5 :: 3 :: 2 :: 1 :: 1 :: []"
+    "5 :: 3 :: 2 :: 1 :: 1 :: []";
 
+  U.ensure_equal_only_with_lazy_eval
+    "{1 + 1, {1, 2 + 2}}"
+    "{1 + 1, {1, 2 + 2}}";
