@@ -63,12 +63,22 @@ let let_rec_in (f, x, e1, e2) = let_in (f, RecLambda (f, x, e1), e2)
 
 let assgin_new_names l = List.map (fun x -> (x, Var ("__" ^ x))) l
 
+(* Substitute the variables in the expression.
+
+ Only variables that are free in a given context (or any underlying contexts) will be substitued.
+
+ @param sbst a lsit of (var, exp) pairs for which each 'var' will be substitued with 'exp' in the expression
+ @param bound a list of variables that are bound
+ @param e an expression in which the variables will be substitued
+
+ @returns the expression with substitued variables.
+*)
 let rec _subst sbst bound = function
   | Var x as e ->
         begin match List.assoc_opt x sbst with
         | None -> e
+        (* Rename the variables bound in a give contect. *)
         | Some e' -> _subst (assgin_new_names bound) bound e'
-        (* | Some e' -> e *)
         end
   | Int _ | Bool _ as e -> e
   | Plus (e1, e2) -> Plus (_subst sbst bound e1, _subst sbst bound e2)
@@ -85,7 +95,7 @@ let rec _subst sbst bound = function
       Lambda (x, _subst sbst' bound' e)
   | RecLambda (f, x, e) ->
       let sbst' = List.remove_assoc f (List.remove_assoc x sbst)
-      and bound' = x::bound
+      and bound' = f::x::bound
       in
       RecLambda (f, x, _subst sbst' bound' e)
   | Apply (e1, e2) -> Apply (_subst sbst bound e1, _subst sbst bound e2)

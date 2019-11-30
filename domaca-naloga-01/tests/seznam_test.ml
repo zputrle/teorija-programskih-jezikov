@@ -5,8 +5,9 @@ module U = Utils;;
 U.ensure_equal "[]" "[]";;
 U.ensure_equal "10 :: []" "10 :: []";;
 U.ensure_equal "10 :: 20 :: []" "10 :: 20 :: []";;
-U.ensure_equal "10 :: (20 + 5) :: []" "10 :: 25 :: []";;
-U.ensure_equal "((FUN x -> x * x) 10) :: 10 :: []" "100 :: 10 :: []";;
+U.ensure_equal_only_with_eager_eval "10 :: (20 + 5) :: []" "10 :: 25 :: []";;
+U.ensure_equal_only_with_lazy_eval "10 :: (20 + 5) :: []" "10 :: (20 + 5) :: []";;
+U.ensure_equal_only_with_eager_eval "((FUN x -> x * x) 10) :: 10 :: []" "100 :: 10 :: []";;
 
 U.ensure_equal
   "MATCH [] WITH
@@ -44,5 +45,4 @@ U.ensure_equal
   | x :: xs -> 5 :: x :: xs"
   "5 :: 10 :: []";;
 
-
-U.ensure_equal "(FUN x -> (10 :: (20 + x) :: [])) 5" "10 :: 25 :: []";;
+U.ensure_equal_only_with_eager_eval "(FUN x -> (10 :: (20 + x) :: [])) 5" "10 :: 25 :: []";;

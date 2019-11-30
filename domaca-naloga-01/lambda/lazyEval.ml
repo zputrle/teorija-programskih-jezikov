@@ -51,10 +51,10 @@ let rec eval_exp = function
               "Evaluation 'match' expression. " ^
               "Expected Cons or Nil but received: " ^ Syntax.string_of_exp v)
       end
-  | S.Fst(Pair(e1, e2)) -> e1
-  | S.Fst e -> S.Fst (eval_exp e)
-  | S.Snd(Pair(e1, e2)) -> e2
-  | S.Snd e -> S.Snd (eval_exp e)
+  | S.Fst(Pair(e1, e2)) -> eval_exp e1
+  | S.Fst e -> eval_exp (S.Fst (eval_exp e))
+  | S.Snd(Pair(e1, e2)) -> eval_exp e2
+  | S.Snd e -> eval_exp (S.Snd (eval_exp e))
 and eval_int e =
   match eval_exp e with
   | S.Int n -> n

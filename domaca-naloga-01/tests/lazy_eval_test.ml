@@ -43,6 +43,10 @@ in
       (n_fib_nums 5)")
     "5 :: 3 :: 2 :: 1 :: 1 :: []";
 
-  U.ensure_equal_only_with_lazy_eval
-    "{1 + 1, {1, 2 + 2}}"
-    "{1 + 1, {1, 2 + 2}}";
+U.ensure_equal_only_with_lazy_eval
+  "{1 + 1, {1, 2 + 2}}"
+  "{1 + 1, {1, 2 + 2}}";
+
+U.ensure_equal_only_with_lazy_eval
+  "(1 + 1) :: 1 :: (2 + 2) :: []"
+  "(1 + 1) :: 1 :: (2 + 2) :: []";
