@@ -26,7 +26,7 @@ inductive tm : Type
 | cons : tm -> tm -> tm
 | list_match : tm -> tm -> ident -> ident -> tm -> tm
 
-
+-- (x, e1, e2) - zamenjaj 'x' z 'e1' v izraziu 'e2'
 def subst : ident -> tm -> tm -> tm
 | x e (tm.var y) :=
     if x = y then e else tm.var y
@@ -342,7 +342,90 @@ begin
         cases Hof,
         apply Hof_a_2
     },
-    repeat {sorry},
+    case step.pair1 {
+        cases Hof,
+        apply of.pair,
+        apply Hstep_ih,
+        exact Hof_a,
+        exact Hof_a_1
+    },
+    case step.pair2 {
+        cases Hof, -- deconstruct
+        apply of.pair,
+        exact Hof_a,
+        apply Hstep_ih,
+        exact Hof_a_1
+    },
+    case step.fst_step  {
+        cases Hof,
+        apply of.fst,
+        apply Hstep_ih,
+        exact Hof_a
+    },
+    case step.snd_step {
+        cases Hof,
+        apply of.snd,
+        apply Hstep_ih,
+        exact Hof_a
+    },
+    case step.fst_beta {
+        cases Hof,
+        cases Hof_a,
+        exact Hof_a_a
+    },
+    case step.snd_beta {
+        cases Hof,
+        cases Hof_a,
+        exact Hof_a_a_1
+    },
+    case step.cons1 {
+        cases Hof,
+        apply of.cons,
+            -- First case
+            apply Hstep_ih,
+            exact Hof_a,
+            -- Second case
+            exact Hof_a_1
+    },
+    case step.cons2 {
+        cases Hof,
+        apply of.cons,
+            -- First case
+            exact Hof_a,
+            -- Second case
+            apply Hstep_ih,
+            exact Hof_a_1
+    },
+    case step.list_match_step {
+        cases Hof,
+        apply of.list_match,
+            -- First case
+            apply Hstep_ih,
+            exact Hof_a,
+            -- Second case
+            exact Hof_a_1,
+            -- Third case,
+            exact Hof_a_2
+    },
+    case step.list_match_nil {
+       cases Hof,
+       exact Hof_a_1
+    },
+    case step.list_match_cons {
+        cases Hof,
+        apply substitution,
+            -- First case
+            cases Hof_a,
+            exact Hof_a_a,
+            -- Second case
+            apply substitution,
+            apply weakening,
+            cases Hof_a,
+            apply Hof_a_a_1,
+            -- Third case
+            exact Hof_a_2
+
+    }
 end
 
 
