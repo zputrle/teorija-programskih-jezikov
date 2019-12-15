@@ -424,7 +424,6 @@ begin
             apply Hof_a_a_1,
             -- Third case
             exact Hof_a_2
-
     }
 end
 
@@ -515,6 +514,127 @@ begin
             existsi (tm.if_then_else h_w H_e1 H_e2),
             exact (step.if_then_else h_h),
         }
-  },
-  repeat {sorry},
+    },
+    case of.pair {
+        cases H_ih_a empty, -- application empty to H_oh_a
+        case or.inl {
+            cases H_ih_a_1 empty,
+            case or.inl {
+                left,
+                apply value.pair,
+                exact h,
+                exact h_1
+            },
+            case or.inr {
+                right,
+                cases h_1,
+                existsi (tm.pair H_e1 h_1_w),
+                apply step.pair2,
+                exact h,
+                exact h_1_h
+            }
+        },
+        case or.inr {
+            cases h,
+            right,
+            existsi (tm.pair h_w H_e2),
+            apply step.pair1,
+            exact h_h
+        }
+    },
+    case of.fst {
+        cases H_ih empty,
+        case or.inl {
+            right,
+            cases h,
+            case value.pair {
+                existsi h_e1,
+                exact (step.fst_beta h)
+            },
+            repeat {cases H_a},
+        },
+        case or.inr {
+            right,
+            cases h,
+            existsi (tm.fst h_w),
+            apply step.fst_step,
+            exact h_h
+        }
+    },
+    case of.snd {
+        cases H_ih empty,
+        case or.inl {
+            right,
+            cases h,
+            case value.pair {
+                existsi h_e2,
+                exact (step.snd_beta h)
+            },
+            repeat {cases H_a},
+        },
+        case or.inr {
+            right,
+            cases h,
+            existsi (tm.snd h_w),
+            apply step.snd_step,
+            exact h_h
+        }
+    },
+    case of.nil {
+        left,
+        exact value.nil
+    },
+    case of.cons {
+        cases H_ih_a empty,
+        case or.inl {
+            cases H_ih_a_1 empty,
+            case or.inl {
+                left,
+                apply value.cons,
+                exact h,
+                exact h_1
+            },
+            case or.inr {
+               right,
+               cases h_1,
+               existsi (tm.cons H_e h_1_w),
+               apply step.cons2,
+               exact h,
+               exact h_1_h
+            }
+        },
+        case or.inr {
+            right,
+            cases h,
+            existsi (tm.cons h_w H_es),
+            apply step.cons1,
+            exact h_h
+        }
+    },
+    case of.list_match {
+        cases H_ih_a empty,
+        case or.inl {
+            cases h,
+            case value.nil {
+                right,
+                existsi H_e1,
+                apply step.list_match_nil
+            },
+            case value.cons {
+                right,
+                existsi (subst H_x h_e (subst H_xs h_es H_e2)),
+                apply step.list_match_cons
+            },
+            repeat {
+                cases H_a
+            }
+        },
+        case or.inr {
+            cases h,
+            right,
+            existsi (tm.list_match h_w H_e1 H_x H_xs H_e2),
+            apply step.list_match_step,
+            exact h_h
+        }
+    },
 end
