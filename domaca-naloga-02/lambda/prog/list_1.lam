@@ -1,0 +1,5 @@
+LET x = 1 :: 2 :: 3 :: 4 :: 5 :: []
+IN
+    MATCH x WITH
+    | [] -> TRUE
+    | x :: xs -> FALSE
