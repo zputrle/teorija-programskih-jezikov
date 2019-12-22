@@ -42,8 +42,40 @@ let rec infer_exp ctx = function
       and a = fresh_ty ()
       in
       a, [(t1, S.ArrowTy (t2, a))] @ eqs1 @ eqs2
-
-
+  | S.Pair (e1, e2) ->
+      let t1, eqs1 = infer_exp ctx e1
+      and t2, eqs2 = infer_exp ctx e2
+      in
+      S.ProdTy(t1, t2),  eqs1 @ eqs2
+  | S.Fst e1 ->
+      let t, eqs = infer_exp ctx e1
+      and a = fresh_ty ()
+      and b = fresh_ty ()
+      in
+      a, [t, S.ProdTy (a, b)] @ eqs
+  | S.Snd e1 ->
+      let t, eqs = infer_exp ctx e1
+      and a = fresh_ty ()
+      and b = fresh_ty ()
+      in
+      b, [t, S.ProdTy (a, b)] @ eqs
+  | S.Nil ->
+      let a = fresh_ty ()
+      in
+      S.ListTy a, []
+  | S.Cons (e1, e2) ->
+      let t1, eqs1 = infer_exp ctx e1
+      and t2, eqs2 = infer_exp ctx e2
+      in
+      S.ListTy t1, [(t2, S.ListTy t1)] @ eqs1 @ eqs2
+  | S.Match (e, e1, x, xs, e2) ->
+      let a = fresh_ty () in
+      let ctx' = (x, a) :: (xs, S.ListTy a) :: ctx in
+      let t, eqs = infer_exp ctx e
+      and t1, eqs1 = infer_exp ctx e1
+      and t2, eqs2 = infer_exp ctx' e2
+      in
+      t1, [(t1, t2); (t, S.ListTy a)] @ eqs @ eqs1 @ eqs2
 
 let subst_equations sbst =
   (* Substitutes type parameters for types in equations. *)
@@ -62,7 +94,8 @@ let rec occurs a = function
   | S.ParamTy a' -> a = a'
   | S.IntTy | S.BoolTy -> false
   | S.ArrowTy (t1, t2) -> occurs a t1 || occurs a t2
-
+  | S.ProdTy (t1, t2) -> occurs a t1 || occurs a t2
+  | S.ListTy (t) -> occurs a t
 
 let rec solve sbst = function
   | [] ->
@@ -77,6 +110,10 @@ let rec solve sbst = function
   | (t, S.ParamTy a) :: eqs when not (occurs a t) ->
       let sbst' = add_subst a t sbst in
       solve sbst' (subst_equations sbst' eqs)
+  | (S.ProdTy(t1, t1'), S.ProdTy (t2, t2')) :: eqs ->
+      solve sbst ((t1, t2) :: (t1', t2') :: eqs)
+  | (S.ListTy t1, S.ListTy t2) :: eqs ->
+      solve sbst ((t1, t2) :: eqs)
   | (t1, t2) :: _ ->
       failwith ("Cannot solve " ^ S.string_of_ty t1 ^ " = " ^ S.string_of_ty t2)
 
@@ -90,7 +127,11 @@ let rec renaming sbst = function
   | S.ArrowTy (t1, t2) ->
       let sbst' = renaming sbst t1 in
       renaming sbst' t2
-
+  | S.ProdTy (t1, t2) ->
+      let sbst' = renaming sbst t1 in
+      renaming sbst' t2
+  | S.ListTy t ->
+      renaming sbst t
 
 let infer e =
   let t, eqs = infer_exp [] e in
