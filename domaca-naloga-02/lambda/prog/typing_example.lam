@@ -1,0 +1,3 @@
+FUN cur_f ->
+    FUN a_b ->
+        ((cur_f (FST a_b)) (SND a_b))
